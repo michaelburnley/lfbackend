@@ -1,29 +1,52 @@
-const https = require('https');
+const request = require('request');
+const crypto = require('crypto');
 const endpoint = 'https://backend-evaluation.lfshopify.com';
 const access_token = 'Q5Cm2xxYgCjnMpS8NYbqqPHf2zJ3ukmc';
 
-const buildHeader = function (name) {
+
+const buildHeader = function (body = {}) {
     return {
-        'Authorization': 'Bearer ' + access_token,
-        'name': name
-    }
+                url: endpoint + "/?name=" + "Michael Burnley",
+                headers: {
+                    "Authorization": "Bearer " + access_token
+                },
+                ...body
+      }
 }
 
-const getRequest = function() {
-    let header = buildHeader('Michael Burnley');
-    let url = endpoint + '?name=' + header.name;
-    console.log(url);
-    https.get(endpoint, header, (res) => {
-        // console.log(res);
-        let data = '';
-        res.on('data', (chunk) => {
-            data += chunk;
-        })
+// const options = {
+//     url: endpoint + "/?name=" + "Michael Burnley",
+//     headers: {
+//       "Authorization": "Bearer " + access_token
+//     }
+//   };
 
-        res.on('end', () => {
-            console.log(JSON.parse(data));
-        });
-    })
+const getRequest = function() {
+    let header = buildHeader();
+    return new Promise((resolve, reject) => {
+        request(header, (err, res, body) => {
+            if (err) { return console.log(err); }
+            console.log(body.explanation);
+            return resolve(body);
+          });
+    });
 };
 
-module.exports.get = getRequest;
+const postRequest = async function () {
+    let req = await getRequest();
+    let new_number = (req[0] * req[1]) + req[2];
+    const hash = crypto.createHmac('sha256', req['secret'])
+                   .update(new_number)
+                   .digest('hex');
+    let params = buildHeader({
+        body: {
+                name: "Michael Burnley",
+                answer: hash
+        }
+    });
+    request.post(params, (error, response, body) => {
+        console.log(body)
+    });
+}
+
+module.exports.get = postRequest();
