@@ -50,4 +50,4 @@ const answer = async () => {
     });
 }
 
-module.exports.get = answer();
+module.exports = answer();
