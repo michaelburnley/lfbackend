@@ -1,12 +1,18 @@
 const request = require('request');
 const crypto = require('crypto');
+const url = require('url');
 const endpoint = 'https://backend-evaluation.lfshopify.com';
 const access_token = 'Q5Cm2xxYgCjnMpS8NYbqqPHf2zJ3ukmc';
 
-
-const buildHeader = function (body = {}) {
+const buildHeader = function (body = {}, name) {
+    let uri;
+    if(name) {
+        uri = endpoint + "/?name=" + name;
+    } else {
+        uri = endpoint;
+    }
     return {
-                url: endpoint + "/?name=" + "Michael Burnley",
+                uri: url.parse(uri).href,
                 headers: {
                     "Authorization": "Bearer " + access_token
                 },
@@ -14,39 +20,34 @@ const buildHeader = function (body = {}) {
       }
 }
 
-// const options = {
-//     url: endpoint + "/?name=" + "Michael Burnley",
-//     headers: {
-//       "Authorization": "Bearer " + access_token
-//     }
-//   };
-
 const getRequest = function() {
-    let header = buildHeader();
+    let header = buildHeader({}, "Michael Burnley");
     return new Promise((resolve, reject) => {
         request(header, (err, res, body) => {
-            if (err) { return console.log(err); }
-            console.log(body.explanation);
-            return resolve(body);
+            if (err) { 
+                return reject(err); 
+            }
+            return resolve(JSON.parse(body));
           });
     });
 };
 
-const postRequest = async function () {
-    let req = await getRequest();
-    let new_number = (req[0] * req[1]) + req[2];
-    const hash = crypto.createHmac('sha256', req['secret'])
-                   .update(new_number)
-                   .digest('hex');
+const answer = async function () {
+    let { numbers, secret } = await getRequest();
+    let new_number = ((numbers[0] * numbers[1]) + numbers[2]).toString();
+    const hash = crypto.createHmac('sha256', secret).update(new_number).digest('hex');
     let params = buildHeader({
         body: {
                 name: "Michael Burnley",
                 answer: hash
-        }
+        },
+        method: 'POST',
+        json: true
     });
-    request.post(params, (error, response, body) => {
+    request(params, (err, res, body) => {
+        if (err) { return console.error(err); }
         console.log(body)
     });
 }
 
-module.exports.get = postRequest();
+module.exports.get = answer();
