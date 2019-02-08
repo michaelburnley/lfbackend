@@ -35,7 +35,7 @@ const getRequest = () => {
 const answer = async () => {
     let { numbers, secret } = await getRequest();
     let new_number = ((numbers[0] * numbers[1]) + numbers[2]).toString();
-    const hash = crypto.createHmac('sha256', secret).update(new_number).digest('hex');
+    let hash = crypto.createHmac('sha256', secret).update(new_number).digest('hex');
     let params = buildHeader({
         body: {
                 name: "Michael Burnley",
