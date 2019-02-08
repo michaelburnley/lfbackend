@@ -4,7 +4,7 @@ const url = require('url');
 const endpoint = 'https://backend-evaluation.lfshopify.com';
 const access_token = 'Q5Cm2xxYgCjnMpS8NYbqqPHf2zJ3ukmc';
 
-const buildHeader = function (body = {}, name) {
+const buildHeader = (body = {}, name) => {
     let uri;
     if(name) {
         uri = endpoint + "/?name=" + name;
@@ -20,10 +20,10 @@ const buildHeader = function (body = {}, name) {
       }
 }
 
-const getRequest = function() {
-    let header = buildHeader({}, "Michael Burnley");
+const getRequest = () => {
+    let params = buildHeader({}, "Michael Burnley");
     return new Promise((resolve, reject) => {
-        request(header, (err, res, body) => {
+        request(params, (err, res, body) => {
             if (err) { 
                 return reject(err); 
             }
@@ -32,7 +32,7 @@ const getRequest = function() {
     });
 };
 
-const answer = async function () {
+const answer = async () => {
     let { numbers, secret } = await getRequest();
     let new_number = ((numbers[0] * numbers[1]) + numbers[2]).toString();
     const hash = crypto.createHmac('sha256', secret).update(new_number).digest('hex');
@@ -46,7 +46,7 @@ const answer = async function () {
     });
     request(params, (err, res, body) => {
         if (err) { return console.error(err); }
-        console.log(body)
+        console.log(body);
     });
 }
 
